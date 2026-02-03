@@ -4,9 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AdminController;
 
-Route::get('/', function () {
-    return view('attendance.bac');
-});
 
 Route::post('/attendance', [AttendanceController::class, 'store'])
     ->name('attendance.store')
