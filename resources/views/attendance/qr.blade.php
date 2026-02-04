@@ -293,7 +293,7 @@
     // ⏳ Wait 5 seconds, then start repeating announcement every 20s
     setTimeout(() => {
       playWelcomeVoice(); // first announcement
-      setInterval(playWelcomeVoice, 30000); // repeat every 20 seconds
+      setInterval(playWelcomeVoice, 15000); // repeat every 20 seconds
     }, 5000);
   });
 </script>
