@@ -10,6 +10,11 @@ use Illuminate\Support\Str;
 class AttendanceController extends Controller
 {
 
+public function qr()
+    {
+        return view('attendance.qr');
+    }
+    
 public function bac()
 {
     // Get the BAC attendance row
