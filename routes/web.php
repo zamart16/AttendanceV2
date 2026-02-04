@@ -23,3 +23,8 @@ Route::post('/admin/controllers/{controller}/toggle', [AdminController::class, '
 
 Route::get('/attendances/today-count', [AttendanceController::class, 'todayCount']);
 
+
+
+Route::get('/admin/attendees', [AdminController::class, 'attendeesList']);
+Route::get('/admin/attendees/realtime', [AdminController::class, 'attendeesRealtime']);
+
