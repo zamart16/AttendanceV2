@@ -209,7 +209,7 @@
     </div>
   </div>
 
-  <script>
+  <!-- <script>
     // 🔗 CHANGE THIS TO YOUR ATTENDANCE FORM URL
     const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
 
@@ -225,7 +225,78 @@
     // Example: Update TOTAL ATTENDEE dynamically
     let attendeeCount = 42; // Replace this with real number from backend
     document.getElementById("attendeeCount").textContent = attendeeCount;
-  </script>
+  </script> -->
+
+    <script>
+  // 🔗 ATTENDANCE FORM URL (QR CODE)
+  const attendanceURL = "https://bac-meeting-attendances.up.railway.app/";
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: attendanceURL,
+    width: 240,
+    height: 240,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // 🔊 Voice Announcement (Female, Formal)
+  function playWelcomeVoice() {
+    if (!('speechSynthesis' in window)) return;
+
+    const message = new SpeechSynthesisUtterance(
+      "Good day, attendees. Welcome to Ralota Hall. Kindly scan this QR code to record your attendance. Thank you."
+    );
+
+    message.lang = 'en-US';
+    message.rate = 0.9;  // slightly slower for clarity
+    message.pitch = 1;
+
+    // Select female voice if available
+    const voices = speechSynthesis.getVoices();
+    message.voice = voices.find(v =>
+      v.lang.startsWith('en') && v.name.toLowerCase().includes('female')
+    ) || voices.find(v => v.lang.startsWith('en')) || null;
+
+    window.speechSynthesis.cancel(); // prevent overlapping
+    window.speechSynthesis.speak(message);
+  }
+
+  // 📊 AJAX attendee counter
+  let lastCount = null;
+
+  function loadAttendeeCountAjax() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/attendances/today-count', true);
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+
+        if (data.count !== lastCount) {
+          lastCount = data.count;
+          document.getElementById('attendeeCount').textContent = data.count;
+        }
+      }
+    };
+
+    xhr.send();
+  }
+
+  // 🚀 On page load
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initial load & polling
+    loadAttendeeCountAjax();
+    setInterval(loadAttendeeCountAjax, 3000);
+
+    // ⏳ Wait 5 seconds, then start repeating announcement every 20s
+    setTimeout(() => {
+      playWelcomeVoice(); // first announcement
+      setInterval(playWelcomeVoice, 30000); // repeat every 20 seconds
+    }, 5000);
+  });
+</script>
 
 </body>
 </html>
