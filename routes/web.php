@@ -20,3 +20,6 @@ Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])
 
 Route::post('/admin/controllers/{controller}/toggle', [AdminController::class, 'toggleController']);
 
+
+Route::get('/attendances/today-count', [AttendanceController::class, 'todayCount']);
+
