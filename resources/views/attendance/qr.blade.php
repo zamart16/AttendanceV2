@@ -286,15 +286,15 @@
 
   // 🚀 On page load
   document.addEventListener('DOMContentLoaded', () => {
-    // Initial load & polling every 2 seconds
+    // Initial load & polling
     loadAttendeeCountAjax();
-    setInterval(loadAttendeeCountAjax, 2000);
+    setInterval(loadAttendeeCountAjax, 3000);
 
-    // ⏳ First voice after 2 seconds, then repeat every 15 seconds
+    // ⏳ Wait 5 seconds, then start repeating announcement every 20s
     setTimeout(() => {
       playWelcomeVoice(); // first announcement
-      setInterval(playWelcomeVoice, 15000); // repeat every 15 seconds
-    }, 2000);
+      setInterval(playWelcomeVoice, 30000); // repeat every 20 seconds
+    }, 5000);
   });
 </script>
 
