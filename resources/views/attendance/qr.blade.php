@@ -227,9 +227,9 @@
     document.getElementById("attendeeCount").textContent = attendeeCount;
   </script> -->
 
-    <script>
+<script>
   // 🔗 ATTENDANCE FORM URL (QR CODE)
-  const attendanceURL = "https://bac-meeting-attendances.up.railway.app/";
+  const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
 
   new QRCode(document.getElementById("qrcode"), {
     text: attendanceURL,
@@ -286,17 +286,18 @@
 
   // 🚀 On page load
   document.addEventListener('DOMContentLoaded', () => {
-    // Initial load & polling
+    // Initial load & polling every 2 seconds
     loadAttendeeCountAjax();
     setInterval(loadAttendeeCountAjax, 2000);
 
-    // ⏳ Wait 5 seconds, then start repeating announcement every 20s
+    // ⏳ First voice after 2 seconds, then repeat every 15 seconds
     setTimeout(() => {
       playWelcomeVoice(); // first announcement
-      setInterval(playWelcomeVoice, 15000); // repeat every 20 seconds
-    }, 3000);
+      setInterval(playWelcomeVoice, 15000); // repeat every 15 seconds
+    }, 2000);
   });
 </script>
+
 
 </body>
 </html>
