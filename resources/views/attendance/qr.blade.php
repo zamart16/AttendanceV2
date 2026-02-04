@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attendance QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #16a34a;
+      --bg-light-1: #f8fafc;
+      --bg-light-2: #eef2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--bg-light-1), var(--bg-light-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #0f172a;
+    }
+
+    /* Decorative Blobs */
+    .blob {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.35;
+      z-index: 0;
+    }
+
+    .blob.one {
+      background: var(--primary);
+      top: -120px;
+      left: -120px;
+    }
+
+    .blob.two {
+      background: var(--secondary);
+      bottom: -120px;
+      right: -120px;
+    }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(18px);
+      border-radius: 28px;
+      padding: 52px 48px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
+      max-width: 460px;
+      width: 92%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    p {
+      margin-bottom: 34px;
+      font-size: 1.1rem;
+      color: #475569;
+    }
+
+    /* QR + Sticker */
+    .qr-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .sticker {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 8px 14px;
+      border-radius: 999px;
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+      transform: rotate(6deg);
+      z-index: 3;
+    }
+
+    .qr-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 30px;
+      background: radial-gradient(circle, rgba(37,99,235,0.25), transparent 70%);
+      animation: pulse 2.5s infinite;
+      z-index: -1;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.6; }
+      50% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.6; }
+    }
+
+    /* QR Box */
+    .qr-box {
+      position: relative;
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    #qrcode {
+      width: 240px;
+      height: 240px;
+    }
+
+    /* Center Logo */
+    #qr-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 56px;
+      height: 56px;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 14px;
+      padding: 6px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #qr-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Total Attendee */
+    .total-attendee {
+      margin-top: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    .footer {
+      margin-top: 28px;
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Blobs -->
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <h1>Scan to Register</h1>
+    <p>Please scan the QR code to record your attendance</p>
+
+    <div class="qr-wrapper">
+      <span class="sticker">SCAN ME</span>
+
+      <div class="qr-box">
+        <div id="qrcode"></div>
+
+        <!-- CENTER LOGO -->
+        <div id="qr-logo">
+          <img src="{{ asset('logo.png')}}" alt="Logo">
+        </div>
+      </div>
+
+      <!-- Total Attendee -->
+      <div class="total-attendee">
+        TOTAL ATTENDEE: <span id="attendeeCount">0</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      Attendance System
+    </div>
+  </div>
+
+  <script>
+    // 🔗 CHANGE THIS TO YOUR ATTENDANCE FORM URL
+    const attendanceURL = "https://bac-meeting-attendances.up.railway.app/";
+
+    new QRCode(document.getElementById("qrcode"), {
+      text: attendanceURL,
+      width: 240,
+      height: 240,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Example: Update TOTAL ATTENDEE dynamically
+    let attendeeCount = 42; // Replace this with real number from backend
+    document.getElementById("attendeeCount").textContent = attendeeCount;
+  </script>
+
+</body>
+</html>
