@@ -211,7 +211,7 @@
 
   <script>
     // 🔗 CHANGE THIS TO YOUR ATTENDANCE FORM URL
-    const attendanceURL = "https://bac-meeting-attendances.up.railway.app/";
+    const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
 
     new QRCode(document.getElementById("qrcode"), {
       text: attendanceURL,
