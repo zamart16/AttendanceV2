@@ -288,13 +288,13 @@
   document.addEventListener('DOMContentLoaded', () => {
     // Initial load & polling
     loadAttendeeCountAjax();
-    setInterval(loadAttendeeCountAjax, 3000);
+    setInterval(loadAttendeeCountAjax, 2000);
 
     // ⏳ Wait 5 seconds, then start repeating announcement every 20s
     setTimeout(() => {
       playWelcomeVoice(); // first announcement
       setInterval(playWelcomeVoice, 15000); // repeat every 20 seconds
-    }, 5000);
+    }, 3000);
   });
 </script>
 
