@@ -124,14 +124,14 @@
         </div>
     </div>
 
-    <button
+<button onclick="openModal()"
         class="w-full px-4 py-2 text-sm font-medium transition-colors !rounded-button whitespace-nowrap
         {{ $controller->status === 'active'
             ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             : 'bg-gray-200 text-gray-400 cursor-not-allowed' }}"
         {{ $controller->status !== 'active' ? 'disabled' : '' }}>
-        View Records
-    </button>
+    View Records
+</button>
 </div>
 
 <script>
@@ -439,6 +439,173 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
             });
         });
     </script>
+
+
+
+    
+
+<!-- MODAL -->
+<div id="recordsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden">
+
+    <div class="bg-white w-full max-w-7xl h-[90vh] rounded-lg shadow-lg overflow-auto p-6 flex flex-col">
+
+        <!-- Modal Body -->
+        <div class="space-y-4 flex-1">
+
+
+
+
+
+
+<!-- Photo Preview Modal -->
+<div id="photoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70">
+    <div class="relative bg-white rounded-md p-2 max-w-[90vw] max-h-[90vh]">
+        <button onclick="closePhotoModal()" class="absolute top-2 right-2 text-white bg-gray-800 px-2 py-1 rounded">✕</button>
+        <img id="photoModalImg" src="" alt="Attendee Photo" class="max-w-full max-h-[80vh] object-contain rounded-md"/>
+    </div>
+</div>
+
+            <!-- Toolbar -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+                <!-- Search -->
+                <div class="w-full md:w-1/3">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search records..."
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
+                    >
+                </div>
+
+                <!-- Export Dropdown -->
+                <div class="relative">
+                    <select
+                        class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-secondary">
+                        <option selected disabled>Export</option>
+                        <option>Excel</option>
+                        <option>PDF</option>
+                        <option>Print</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                <table class="min-w-full text-sm text-left text-gray-700">
+                    <thead class="bg-gray-100 text-xs uppercase text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3">#</th>
+                            <th class="px-4 py-3">Full Name</th>
+                            <th class="px-4 py-3">Position</th>
+                            <th class="px-4 py-3">Type</th>
+                            <th class="px-4 py-3">Phone Number</th>
+                            <th class="px-4 py-3">Purpose</th>
+                            <th class="px-4 py-3">Photo</th>
+                            <th class="px-4 py-3">Date</th>
+                            <th class="px-4 py-3">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendeesTable" class="divide-y divide-gray-200">
+                        <!-- Dynamic rows go here -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="border-t pt-4 flex justify-end">
+            <button
+                onclick="closeModal()"
+                class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-md">
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+    // ✅ Modal open/close
+    function openModal() {
+        document.getElementById('recordsModal').classList.remove('hidden');
+        fetchAttendees(); // fetch immediately
+    }
+
+    function closeModal() {
+        document.getElementById('recordsModal').classList.add('hidden');
+    }
+
+    function openPhotoModal(url) {
+    const modal = document.getElementById('photoModal');
+    const img = document.getElementById('photoModalImg');
+    img.src = url;
+    modal.classList.remove('hidden');
+}
+
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    modal.classList.add('hidden');
+    document.getElementById('photoModalImg').src = '';
+}
+
+    // 🔄 Fetch attendees and render table
+    async function fetchAttendees() {
+        try {
+            const res = await fetch('/admin/attendees/realtime');
+            const data = await res.json();
+
+            const tbody = document.getElementById('attendeesTable');
+            tbody.innerHTML = ''; // clear table
+
+            data.attendees.forEach((attendee, index) => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+
+                row.innerHTML = `
+                    <td class="px-4 py-2">${index + 1}</td>
+                    <td class="px-4 py-2">${attendee.fullName}</td>
+                    <td class="px-4 py-2">${attendee.position}</td>
+                    <td class="px-4 py-2">${attendee.type_attendee}</td>
+                    <td class="px-4 py-2">${attendee.phone_number}</td>
+                    <td class="px-4 py-2">${attendee.purpose}</td>
+                    <td class="px-4 py-2">
+                      ${attendee.photo
+                          ? `<img src="${attendee.photo}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${attendee.photo}')" />`
+                          : 'N/A'}
+                    </td>
+                    <td class="px-4 py-2">${attendee.attendance_date}</td>
+                    <td class="px-4 py-2">${attendee.attendance_time}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        } catch (err) {
+            console.error('Failed to fetch attendees:', err);
+        }
+    }
+
+    // 🔁 Real-time polling every 3 seconds (only if modal is open)
+    setInterval(() => {
+        const modal = document.getElementById('recordsModal');
+        if (!modal.classList.contains('hidden')) {
+            fetchAttendees();
+        }
+    }, 3000);
+
+    // Optional: search filter
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+        const filter = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll('#attendeesTable tr');
+        rows.forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+        });
+    });
+</script>
 
 
 </body>
