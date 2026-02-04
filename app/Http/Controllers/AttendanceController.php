@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 class AttendanceController extends Controller
 {
 
@@ -119,4 +124,22 @@ public function bac()
             ], 500);
         }
     }
+
+    public function todayCount(): JsonResponse
+{
+    $today = Carbon::now()->format('Y-m-d');
+
+    $count = DB::table('attendees')
+        ->where('attendance_date', $today)
+        ->count();
+
+    return response()->json(
+        ['count' => $count],
+        200,
+        [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache'
+        ]
+    );
+}
 }
