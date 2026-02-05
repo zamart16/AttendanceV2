@@ -11,6 +11,8 @@
   <!-- QR Code Library -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    
   <style>
     :root {
       --primary: #2563eb;
@@ -177,6 +179,25 @@
 </head>
 <body>
 
+    <!-- Top-left Voice Toggle -->
+<div class="fixed top-4 left-4 z-50 flex items-center gap-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md">
+  <label class="relative inline-flex items-center cursor-pointer">
+      <input
+          type="checkbox"
+          id="voiceToggle"
+          class="sr-only peer">
+      <div class="w-11 h-6 bg-gray-200 rounded-full peer
+          peer-checked:after:translate-x-full
+          peer-checked:after:border-white
+          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+          peer-checked:bg-blue-500">
+      </div>
+  </label>
+  <span class="text-gray-700 font-semibold text-sm">Voice Assistant</span>
+</div>
+
+
   <!-- Background Blobs -->
   <div class="blob one"></div>
   <div class="blob two"></div>
@@ -227,7 +248,7 @@
     document.getElementById("attendeeCount").textContent = attendeeCount;
   </script> -->
 
-<script>
+<!-- <script>
   // 🔗 ATTENDANCE FORM URL (QR CODE)
   const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
 
@@ -296,8 +317,87 @@
       setInterval(playWelcomeVoice, 30000); // repeat every 20 seconds
     }, 5000);
   });
-</script>
+</script> -->
 
+
+
+    <script>
+  // 🔗 Attendance QR URL
+  const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: attendanceURL,
+    width: 240,
+    height: 240,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // 🔊 Voice Assistant
+  const voiceToggle = document.getElementById('voiceToggle');
+  let voiceEnabled = false;
+
+  function playWelcomeVoice() {
+    if (!voiceEnabled) return; // do nothing if toggle OFF
+    if (!('speechSynthesis' in window)) return;
+
+    // Stop any ongoing speech immediately
+    window.speechSynthesis.cancel();
+
+    const msg = new SpeechSynthesisUtterance(
+      "Good day, attendees. Welcome to Ralota Hall. Kindly scan this QR code to record your attendance. Thank you."
+    );
+    msg.lang = 'en-US';
+    msg.rate = 0.9;
+    msg.pitch = 1;
+
+    const voices = speechSynthesis.getVoices();
+    msg.voice = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ||
+                voices.find(v => v.lang.startsWith('en')) || null;
+
+    window.speechSynthesis.speak(msg);
+  }
+
+  // 📊 Attendee counter (AJAX)
+  let lastCount = null;
+  function loadAttendeeCountAjax() {
+    fetch('/attendances/today-count', { headers: { 'Accept': 'application/json' } })
+      .then(res => res.json())
+      .then(data => {
+        if (data.count !== lastCount) {
+          lastCount = data.count;
+          document.getElementById('attendeeCount').textContent = data.count;
+        }
+      })
+      .catch(() => {});
+  }
+
+  // 🚀 On page load
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAttendeeCountAjax();
+    setInterval(loadAttendeeCountAjax, 3000);
+
+    // 🔄 Voice toggle logic
+    voiceToggle.checked = false; // start OFF
+    voiceToggle.addEventListener('change', () => {
+      voiceEnabled = voiceToggle.checked;
+
+      if (!voiceEnabled) {
+        // Stop speech immediately if toggle OFF
+        window.speechSynthesis.cancel();
+      } else {
+        // Play first announcement immediately if toggled ON
+        playWelcomeVoice();
+      }
+    });
+
+    // 🔁 Repeat voice every 15 seconds only if toggle ON
+    setInterval(() => {
+      if (voiceEnabled) playWelcomeVoice();
+    }, 15000);
+  });
+</script>
 
 </body>
 </html>
