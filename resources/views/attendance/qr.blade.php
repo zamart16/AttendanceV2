@@ -204,7 +204,9 @@
 
   <!-- Main Card -->
   <div class="card">
-    <h1>Scan to Attendance</h1>
+    <h1 class="text-4xl font-extrabold text-center text-gradient mb-3 relative inline-block">
+  Scan to Register
+</h1>
     <p>Please scan the QR code to record your attendance</p>
 
     <div class="qr-wrapper">
