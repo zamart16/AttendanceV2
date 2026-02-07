@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AdminController;
 
+use Illuminate\Routing\Middleware\ValidateSignature;
+
 Route::get('/', function () {
     return view('attendance.qr');
 });
@@ -15,8 +17,12 @@ Route::post('/attendance', [AttendanceController::class, 'store'])
 Route::get('/bac-attendance', [AttendanceController::class, 'bac'])
     ->name('bac.attendance');
 
-Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])
-    ->name('admin.dashboard');
+// Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])
+//     ->name('admin.dashboard');
+Route::get('/admin-dashboard-bac', [AdminController::class, 'dashboard'])
+    ->name('admin.dashboard')
+    ->middleware(['auth', 'signed']);
+
 
 Route::post('/admin/controllers/{controller}/toggle', [AdminController::class, 'toggleController']);
 
