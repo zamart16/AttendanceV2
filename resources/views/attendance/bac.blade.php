@@ -643,10 +643,20 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // --- INITIALIZE DATE TO TODAY ---
-  const dateInput = document.getElementById('attendanceDate');
-  if (dateInput) {
-    dateInput.value = new Date().toISOString().split('T')[0];
-  }
+  // const dateInput = document.getElementById('attendanceDate');
+  // if (dateInput) {
+  //   dateInput.value = new Date().toISOString().split('T')[0];
+  // }
+    const dateInput = document.getElementById('attendanceDate');
+if (dateInput) {
+  const today = new Date();
+  const localDate = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
+
+  dateInput.value = localDate;
+}
+
 
 });
 </script>
