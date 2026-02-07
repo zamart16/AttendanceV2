@@ -19,6 +19,9 @@ Route::get('/bac-attendance', [AttendanceController::class, 'bac'])
 
 // Route::get('/admin-dashboard', [AdminController::class, 'dashboard'])
 //     ->name('admin.dashboard');
+// Route::get('/admin-dashboard-bac', [AdminController::class, 'dashboard'])
+//     ->name('admin.dashboard')
+//     ->middleware(['auth', 'signed']);
 Route::get('/admin-dashboard-bac', [AdminController::class, 'dashboard'])
     ->name('admin.dashboard')
     ->middleware(['auth', 'signed']);
