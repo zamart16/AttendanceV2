@@ -458,12 +458,27 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
 
 
 <!-- Photo Preview Modal -->
-<div id="photoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70">
-    <div class="relative bg-white rounded-md p-2 max-w-[90vw] max-h-[90vh]">
-        <button onclick="closePhotoModal()" class="absolute top-2 right-2 text-white bg-gray-800 px-2 py-1 rounded">✕</button>
-        <img id="photoModalImg" src="" alt="Attendee Photo" class="max-w-full max-h-[80vh] object-contain rounded-md"/>
-    </div>
+<div
+  id="photoModal"
+  class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 p-4"
+>
+  <div class="relative max-w-full max-h-full">
+    <button
+      onclick="closePhotoModal()"
+      class="absolute -top-3 -right-3 z-10 text-white bg-black/80 w-8 h-8 rounded-full flex items-center justify-center"
+    >
+      ✕
+    </button>
+
+    <img
+      id="photoModalImg"
+      src=""
+      alt="Attendee Photo"
+      class="max-w-[90vw] max-h-[90vh] object-contain rounded-md shadow-lg"
+    />
+  </div>
 </div>
+
 
             <!-- Toolbar -->
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
