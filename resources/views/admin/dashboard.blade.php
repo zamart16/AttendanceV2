@@ -10,6 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+
+    
     <script>
         tailwind.config = {
             theme: {
@@ -619,6 +624,88 @@ function closePhotoModal() {
         rows.forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
         });
+
+
+
+
+            // ===============================
+    // ✅ EXPORT PDF
+    // ===============================
+
+    const exportBtn = document.getElementById('exportPdfBtn');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async function () {
+
+            if (attendeesData.length === 0) {
+                await fetchAttendees();
+            }
+
+            if (attendeesData.length === 0) {
+                alert('No records found.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // ✅ Get attendance_date from first record
+            const rawDate = attendeesData[0].attendance_date ?? null;
+
+            let formattedDate = 'N/A';
+
+            if (rawDate) {
+                const dateObj = new Date(rawDate);
+                formattedDate = dateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+
+            const totalCount = attendeesData.length;
+
+            // ✅ HEADER
+            doc.setFontSize(16);
+            doc.text("Attendance Report", 14, 15);
+
+            doc.setFontSize(11);
+            doc.text(`Attendance Date: ${formattedDate}`, 14, 23);
+            doc.text(`Total Attendees: ${totalCount}`, 14, 30);
+
+            // ✅ TABLE DATA
+            const tableData = attendeesData.map((a, index) => [
+                index + 1,
+                a.fullName ?? '',
+                a.position ?? '',
+                a.type_attendee ?? '',
+                a.phone_number ?? '',
+                a.purpose ?? '',
+                a.photo ? 'With Photo' : 'N/A',
+                a.attendance_date ?? '',
+                a.attendance_time ?? ''
+            ]);
+
+            doc.autoTable({
+                startY: 38,
+                head: [[
+                    '#',
+                    'Full Name',
+                    'Position',
+                    'Type',
+                    'Phone',
+                    'Purpose',
+                    'Photo',
+                    'Date',
+                    'Time'
+                ]],
+                body: tableData,
+                styles: { fontSize: 8 }
+            });
+
+            doc.save(`attendance-report-${rawDate ?? 'report'}.pdf`);
+        });
+    }
     });
 </script>
 
