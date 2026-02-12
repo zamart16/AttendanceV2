@@ -510,8 +510,8 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
                 </div> -->
 
                 <button id="exportPdfBtn" class="px-4 py-2 text-sm bg-secondary text-white rounded-md">
-    Export PDF
-</button>
+                Export PDF
+                </button>
 
             </div>
 
@@ -551,12 +551,14 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
     </div>
 </div>
 
-<!-- SCRIPT -->
 <script>
+
+    let attendeesData = []; // ✅ GLOBAL (needed for PDF)
+
     // ✅ Modal open/close
     function openModal() {
         document.getElementById('recordsModal').classList.remove('hidden');
-        fetchAttendees(); // fetch immediately
+        fetchAttendees();
     }
 
     function closeModal() {
@@ -564,17 +566,17 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
     }
 
     function openPhotoModal(url) {
-    const modal = document.getElementById('photoModal');
-    const img = document.getElementById('photoModalImg');
-    img.src = url;
-    modal.classList.remove('hidden');
-}
+        const modal = document.getElementById('photoModal');
+        const img = document.getElementById('photoModalImg');
+        img.src = url;
+        modal.classList.remove('hidden');
+    }
 
-function closePhotoModal() {
-    const modal = document.getElementById('photoModal');
-    modal.classList.add('hidden');
-    document.getElementById('photoModalImg').src = '';
-}
+    function closePhotoModal() {
+        const modal = document.getElementById('photoModal');
+        modal.classList.add('hidden');
+        document.getElementById('photoModalImg').src = '';
+    }
 
     // 🔄 Fetch attendees and render table
     async function fetchAttendees() {
@@ -582,57 +584,68 @@ function closePhotoModal() {
             const res = await fetch('/admin/attendees/realtime');
             const data = await res.json();
 
-            const tbody = document.getElementById('attendeesTable');
-            tbody.innerHTML = ''; // clear table
+            attendeesData = data.attendees || []; // ✅ store globally
 
-            data.attendees.forEach((attendee, index) => {
+            const tbody = document.getElementById('attendeesTable');
+            tbody.innerHTML = '';
+
+            attendeesData.forEach((attendee, index) => {
                 const row = document.createElement('tr');
                 row.classList.add('hover:bg-gray-50');
 
                 row.innerHTML = `
                     <td class="px-4 py-2">${index + 1}</td>
-                    <td class="px-4 py-2">${attendee.fullName}</td>
-                    <td class="px-4 py-2">${attendee.position}</td>
-                    <td class="px-4 py-2">${attendee.type_attendee}</td>
-                    <td class="px-4 py-2">${attendee.phone_number}</td>
-                    <td class="px-4 py-2">${attendee.purpose}</td>
+                    <td class="px-4 py-2">${attendee.fullName ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.position ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.type_attendee ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.phone_number ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.purpose ?? ''}</td>
                     <td class="px-4 py-2">
                       ${attendee.photo
                           ? `<img src="${attendee.photo}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${attendee.photo}')" />`
                           : 'N/A'}
                     </td>
-                    <td class="px-4 py-2">${attendee.attendance_date}</td>
-                    <td class="px-4 py-2">${attendee.attendance_time}</td>
+                    <td class="px-4 py-2">${attendee.attendance_date ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.attendance_time ?? ''}</td>
                 `;
 
                 tbody.appendChild(row);
             });
+
         } catch (err) {
             console.error('Failed to fetch attendees:', err);
         }
     }
 
-    // 🔁 Real-time polling every 3 seconds (only if modal is open)
+    // 🔁 Real-time polling every 3 seconds
     setInterval(() => {
         const modal = document.getElementById('recordsModal');
-        if (!modal.classList.contains('hidden')) {
+        if (modal && !modal.classList.contains('hidden')) {
             fetchAttendees();
         }
     }, 3000);
 
-    // Optional: search filter
+    // ===============================
+    // ✅ SEARCH FILTER
+    // ===============================
+
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', () => {
-        const filter = searchInput.value.toLowerCase();
-        const rows = document.querySelectorAll('#attendeesTable tr');
-        rows.forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#attendeesTable tr');
+
+            rows.forEach(row => {
+                row.style.display =
+                    row.textContent.toLowerCase().includes(filter)
+                        ? ''
+                        : 'none';
+            });
         });
+    }
 
-
-
-
-            // ===============================
+    // ===============================
     // ✅ EXPORT PDF
     // ===============================
 
@@ -653,7 +666,6 @@ function closePhotoModal() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape');
 
-            // ✅ Get attendance_date from first record
             const rawDate = attendeesData[0].attendance_date ?? null;
 
             let formattedDate = 'N/A';
@@ -669,7 +681,6 @@ function closePhotoModal() {
 
             const totalCount = attendeesData.length;
 
-            // ✅ HEADER
             doc.setFontSize(16);
             doc.text("Attendance Report", 14, 15);
 
@@ -677,7 +688,6 @@ function closePhotoModal() {
             doc.text(`Attendance Date: ${formattedDate}`, 14, 23);
             doc.text(`Total Attendees: ${totalCount}`, 14, 30);
 
-            // ✅ TABLE DATA
             const tableData = attendeesData.map((a, index) => [
                 index + 1,
                 a.fullName ?? '',
@@ -710,7 +720,7 @@ function closePhotoModal() {
             doc.save(`attendance-report-${rawDate ?? 'report'}.pdf`);
         });
     }
-    });
+
 </script>
 
 
