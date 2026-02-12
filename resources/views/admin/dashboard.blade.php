@@ -499,7 +499,7 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
                 </div>
 
                 <!-- Export Dropdown -->
-                <div class="relative">
+                <!-- <div class="relative">
                     <select
                         class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-secondary">
                         <option selected disabled>Export</option>
@@ -507,7 +507,11 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
                         <option>PDF</option>
                         <option>Print</option>
                     </select>
-                </div>
+                </div> -->
+
+                <button id="exportPdfBtn" class="px-4 py-2 text-sm bg-secondary text-white rounded-md">
+    Export PDF
+</button>
 
             </div>
 
