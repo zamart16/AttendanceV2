@@ -438,7 +438,7 @@
                       <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex items-center justify-center bg-gray-100 rounded-full">
                         <i class="ri-camera-line text-2xl sm:text-3xl md:text-4xl text-gray-400"></i>
                       </div>
-                      <p class="text-gray-500 text-base sm:text-lg px-4 text-center">Tap to start camera and capture your photo</p>
+                      <p class="text-gray-500 text-base sm:text-lg px-4 text-center">Tap to start camera and take a photo with valid ID</p>
                     </div>
                     <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-sm">
                       <button type="button" id="startCameraBtn" class="ripple flex-1 px-4 py-3 bg-primary text-white rounded-button font-semibold hover:bg-secondary active:scale-95 transition-all duration-300 whitespace-nowrap flex items-center justify-center">
