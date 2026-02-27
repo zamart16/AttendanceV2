@@ -551,200 +551,193 @@ const response = await fetch(`/admin/controllers/${controllerId}/toggle`, {
     </div>
 </div>
 
+
 <script>
-let attendeesData = []; // ✅ GLOBAL (needed for PDF)
+document.addEventListener('DOMContentLoaded', function () {
 
-// ===============================
-// ✅ Modal open/close
-// ===============================
-function openModal() {
-    document.getElementById('recordsModal').classList.remove('hidden');
-    fetchAttendees();
-}
+    let attendeesData = [];
 
-function closeModal() {
-    document.getElementById('recordsModal').classList.add('hidden');
-}
+    // ===============================
+    // ✅ MODAL FUNCTIONS
+    // ===============================
 
-function openPhotoModal(url) {
-    const modal = document.getElementById('photoModal');
-    const img = document.getElementById('photoModalImg');
-    img.src = url;
-    modal.classList.remove('hidden');
-}
-
-function closePhotoModal() {
-    const modal = document.getElementById('photoModal');
-    modal.classList.add('hidden');
-    document.getElementById('photoModalImg').src = '';
-}
-
-// ===============================
-// 🔄 Fetch attendees and render table
-// ===============================
-async function fetchAttendees() {
-    try {
-        const res = await fetch('/admin/attendees/realtime');
-        const data = await res.json();
-
-        attendeesData = data.attendees || []; // ✅ store globally
-
-        const tbody = document.getElementById('attendeesTable');
-        tbody.innerHTML = '';
-
-        attendeesData.forEach((attendee, index) => {
-            const row = document.createElement('tr');
-            row.classList.add('hover:bg-gray-50');
-
-            // ✅ Construct full public image URL
-            const photoUrl = attendee.photo
-                ? `https://tpcbnkbteiuoctwqqfgv.supabase.co/storage/v1/object/public/photos/attendance/${attendee.photo}`
-                : null;
-
-            row.innerHTML = `
-                <td class="px-4 py-2">${index + 1}</td>
-                <td class="px-4 py-2">${attendee.fullName ?? ''}</td>
-                <td class="px-4 py-2">${attendee.position ?? ''}</td>
-                <td class="px-4 py-2">${attendee.type_attendee ?? ''}</td>
-                <td class="px-4 py-2">${attendee.phone_number ?? ''}</td>
-                <td class="px-4 py-2">${attendee.purpose ?? ''}</td>
-                <td class="px-4 py-2">
-                    ${photoUrl 
-                        ? `<img src="${photoUrl}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${photoUrl}')" />`
-                        : 'N/A'}
-                </td>
-                <td class="px-4 py-2">${attendee.attendance_date ?? ''}</td>
-                <td class="px-4 py-2">${attendee.attendance_time ?? ''}</td>
-            `;
-
-            tbody.appendChild(row);
-        });
-
-    } catch (err) {
-        console.error('Failed to fetch attendees:', err);
-    }
-}
-
-// ===============================
-// 🔁 Real-time polling every 3 seconds
-// ===============================
-setInterval(() => {
-    const modal = document.getElementById('recordsModal');
-    if (modal && !modal.classList.contains('hidden')) {
+    window.openModal = function () {
+        document.getElementById('recordsModal').classList.remove('hidden');
         fetchAttendees();
     }
-}, 3000);
 
-// ===============================
-// ✅ SEARCH FILTER
-// ===============================
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
-    searchInput.addEventListener('input', function () {
-        const filter = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#attendeesTable tr');
+    window.closeModal = function () {
+        document.getElementById('recordsModal').classList.add('hidden');
+    }
 
-        rows.forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-        });
-    });
-}
+    window.openPhotoModal = function (url) {
+        const modal = document.getElementById('photoModal');
+        const img = document.getElementById('photoModalImg');
+        img.src = url;
+        modal.classList.remove('hidden');
+    }
 
-// ===============================
-// ✅ EXPORT PDF WITH IMAGES WORKING
-// ===============================
-const exportBtn = document.getElementById('exportPdfBtn');
+    window.closePhotoModal = function () {
+        const modal = document.getElementById('photoModal');
+        modal.classList.add('hidden');
+        document.getElementById('photoModalImg').src = '';
+    }
 
-if (exportBtn) {
-    exportBtn.addEventListener('click', async function () {
+    // ===============================
+    // ✅ FETCH ATTENDEES
+    // ===============================
 
-        if (attendeesData.length === 0) {
-            await fetchAttendees();
-        }
-        if (attendeesData.length === 0) {
-            alert('No records found.');
-            return;
-        }
+    async function fetchAttendees() {
+        try {
+            const res = await fetch('/admin/attendees/realtime');
+            const data = await res.json();
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('landscape');
+            attendeesData = data.attendees || [];
 
-        const rawDate = attendeesData[0]?.attendance_date ?? null;
-        let formattedDate = 'N/A';
-        if (rawDate) {
-            const dateObj = new Date(rawDate);
-            formattedDate = dateObj.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+            const tbody = document.getElementById('attendeesTable');
+            tbody.innerHTML = '';
+
+            attendeesData.forEach((attendee, index) => {
+
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+
+                row.innerHTML = `
+                    <td class="px-4 py-2">${index + 1}</td>
+                    <td class="px-4 py-2">${attendee.fullName ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.position ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.type_attendee ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.phone_number ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.purpose ?? ''}</td>
+                    <td class="px-4 py-2">
+                        ${attendee.photo
+                            ? `<img src="${attendee.photo}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${attendee.photo}')" />`
+                            : 'N/A'}
+                    </td>
+                    <td class="px-4 py-2">${attendee.attendance_date ?? ''}</td>
+                    <td class="px-4 py-2">${attendee.attendance_time ?? ''}</td>
+                `;
+
+                tbody.appendChild(row);
             });
+
+        } catch (err) {
+            console.error('Failed to fetch attendees:', err);
         }
+    }
 
-        const totalCount = attendeesData.length;
+    // ===============================
+    // ✅ REALTIME POLLING
+    // ===============================
 
-        doc.setFontSize(16);
-        doc.text("Attendance Report", 14, 15);
-        doc.setFontSize(11);
-        doc.text(`Attendance Date: ${formattedDate}`, 14, 23);
-        doc.text(`Total Attendees: ${totalCount}`, 14, 30);
+    setInterval(() => {
+        const modal = document.getElementById('recordsModal');
+        if (modal && !modal.classList.contains('hidden')) {
+            fetchAttendees();
+        }
+    }, 3000);
 
-        // Helper: Convert image URL to Base64
-        async function getImageDataUrl(url) {
-            try {
-                const res = await fetch(url, { mode: 'cors' });
-                if (!res.ok) return null;
-                const blob = await res.blob();
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
+    // ===============================
+    // ✅ SEARCH FILTER
+    // ===============================
+
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#attendeesTable tr');
+
+            rows.forEach(row => {
+                row.style.display =
+                    row.textContent.toLowerCase().includes(filter)
+                        ? ''
+                        : 'none';
+            });
+        });
+    }
+
+    // ===============================
+    // ✅ EXPORT PDF
+    // ===============================
+
+    const exportBtn = document.getElementById('exportPdfBtn');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async function () {
+
+            if (attendeesData.length === 0) {
+                await fetchAttendees();
+            }
+
+            if (attendeesData.length === 0) {
+                alert('No records found.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+
+            // ✅ Get attendance_date from first record
+            const rawDate = attendeesData[0].attendance_date ?? null;
+
+            let formattedDate = 'N/A';
+
+            if (rawDate) {
+                const dateObj = new Date(rawDate);
+                formattedDate = dateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
-            } catch (err) {
-                console.error("Failed to load image:", url, err);
-                return null;
             }
-        }
 
-        // Prepare table data with Base64 images
-        const tableData = await Promise.all(attendeesData.map(async (a, index) => {
-            let imgData = null;
-            if (a.photo) {
-                const photoUrl = `https://tpcbnkbteiuoctwqqfgv.supabase.co/storage/v1/object/public/photos/attendance/${a.photo}`;
-                imgData = await getImageDataUrl(photoUrl);
-            }
-            return [
+            const totalCount = attendeesData.length;
+
+            // ✅ HEADER
+            doc.setFontSize(16);
+            doc.text("Attendance Report", 14, 15);
+
+            doc.setFontSize(11);
+            doc.text(`Attendance Date: ${formattedDate}`, 14, 23);
+            doc.text(`Total Attendees: ${totalCount}`, 14, 30);
+
+            // ✅ TABLE DATA
+            const tableData = attendeesData.map((a, index) => [
                 index + 1,
                 a.fullName ?? '',
                 a.position ?? '',
                 a.type_attendee ?? '',
                 a.phone_number ?? '',
                 a.purpose ?? '',
-                imgData,
+                a.photo ? 'With Photo' : 'N/A',
                 a.attendance_date ?? '',
                 a.attendance_time ?? ''
-            ];
-        }));
+            ]);
 
-        // Draw table with images
-        doc.autoTable({
-            startY: 38,
-            head: [[
-                '#', 'Full Name', 'Position', 'Type', 'Phone', 'Purpose', 'Photo', 'Date', 'Time'
-            ]],
-            body: tableData,
-            styles: { fontSize: 8 },
-            didDrawCell: function (data) {
-                if (data.column.index === 6 && data.cell.raw) {
-                    const dim = 12; // image size
-                    doc.addImage(data.cell.raw, 'JPEG', data.cell.x + 1, data.cell.y + 1, dim, dim);
-                }
-            }
+            doc.autoTable({
+                startY: 38,
+                head: [[
+                    '#',
+                    'Full Name',
+                    'Position',
+                    'Type',
+                    'Phone',
+                    'Purpose',
+                    'Photo',
+                    'Date',
+                    'Time'
+                ]],
+                body: tableData,
+                styles: { fontSize: 8 }
+            });
+
+            doc.save(`attendance-report-${rawDate ?? 'report'}.pdf`);
         });
+    }
 
-        doc.save(`attendance-report-${rawDate ?? 'report'}.pdf`);
-    });
-}
+});
 </script>
 
 
