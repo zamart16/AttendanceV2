@@ -646,7 +646,7 @@ if (searchInput) {
 }
 
 // ===============================
-// ✅ EXPORT PDF WITH IMAGES
+// ✅ EXPORT PDF WITH IMAGES FIXED
 // ===============================
 const exportBtn = document.getElementById('exportPdfBtn');
 
@@ -656,7 +656,6 @@ if (exportBtn) {
         if (attendeesData.length === 0) {
             await fetchAttendees();
         }
-
         if (attendeesData.length === 0) {
             alert('No records found.');
             return;
@@ -684,7 +683,7 @@ if (exportBtn) {
         doc.text(`Attendance Date: ${formattedDate}`, 14, 23);
         doc.text(`Total Attendees: ${totalCount}`, 14, 30);
 
-        // Helper: convert image URL to Base64
+        // Helper: Convert image URL to Base64
         async function getImageDataUrl(url) {
             try {
                 const res = await fetch(url);
@@ -704,9 +703,13 @@ if (exportBtn) {
         // Prepare table data with Base64 images
         const tableData = await Promise.all(attendeesData.map(async (a, index) => {
             let imgData = null;
+
             if (a.photo) {
-                imgData = await getImageDataUrl(a.photo);
+                // ✅ Use full public URL from Supabase
+                const photoUrl = `https://YOUR_SUPABASE_PROJECT_URL/storage/v1/object/public/photos/attendance/${a.photo}`;
+                imgData = await getImageDataUrl(photoUrl);
             }
+
             return [
                 index + 1,
                 a.fullName ?? '',
@@ -714,13 +717,13 @@ if (exportBtn) {
                 a.type_attendee ?? '',
                 a.phone_number ?? '',
                 a.purpose ?? '',
-                imgData, // PDF image
+                imgData, // Base64 image for PDF
                 a.attendance_date ?? '',
                 a.attendance_time ?? ''
             ];
         }));
 
-        // Generate PDF table with images
+        // Draw table with images
         doc.autoTable({
             startY: 38,
             head: [[
@@ -730,7 +733,7 @@ if (exportBtn) {
             styles: { fontSize: 8 },
             didDrawCell: function (data) {
                 if (data.column.index === 6 && data.cell.raw) { // Photo column
-                    const dim = 12;
+                    const dim = 12; // size of photo in PDF
                     doc.addImage(data.cell.raw, 'JPEG', data.cell.x + 1, data.cell.y + 1, dim, dim);
                 }
             }
