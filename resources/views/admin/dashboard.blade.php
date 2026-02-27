@@ -596,6 +596,11 @@ async function fetchAttendees() {
             const row = document.createElement('tr');
             row.classList.add('hover:bg-gray-50');
 
+            // ✅ Construct full public image URL
+            const photoUrl = attendee.photo
+                ? `https://tpcbnkbteiuoctwqqfgv.supabase.co/storage/v1/object/public/photos/attendance/${attendee.photo}`
+                : null;
+
             row.innerHTML = `
                 <td class="px-4 py-2">${index + 1}</td>
                 <td class="px-4 py-2">${attendee.fullName ?? ''}</td>
@@ -604,8 +609,8 @@ async function fetchAttendees() {
                 <td class="px-4 py-2">${attendee.phone_number ?? ''}</td>
                 <td class="px-4 py-2">${attendee.purpose ?? ''}</td>
                 <td class="px-4 py-2">
-                    ${attendee.photo 
-                        ? `<img src="${attendee.photo}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${attendee.photo}')" />`
+                    ${photoUrl 
+                        ? `<img src="${photoUrl}" class="w-12 h-12 object-cover rounded-md cursor-pointer" onclick="openPhotoModal('${photoUrl}')" />`
                         : 'N/A'}
                 </td>
                 <td class="px-4 py-2">${attendee.attendance_date ?? ''}</td>
@@ -646,7 +651,7 @@ if (searchInput) {
 }
 
 // ===============================
-// ✅ EXPORT PDF WITH IMAGES FIXED
+// ✅ EXPORT PDF WITH IMAGES WORKING
 // ===============================
 const exportBtn = document.getElementById('exportPdfBtn');
 
@@ -686,7 +691,8 @@ if (exportBtn) {
         // Helper: Convert image URL to Base64
         async function getImageDataUrl(url) {
             try {
-                const res = await fetch(url);
+                const res = await fetch(url, { mode: 'cors' });
+                if (!res.ok) return null;
                 const blob = await res.blob();
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -703,13 +709,10 @@ if (exportBtn) {
         // Prepare table data with Base64 images
         const tableData = await Promise.all(attendeesData.map(async (a, index) => {
             let imgData = null;
-
             if (a.photo) {
-                // ✅ Use full public URL from Supabase
-                const photoUrl = `https://YOUR_SUPABASE_PROJECT_URL/storage/v1/object/public/photos/attendance/${a.photo}`;
+                const photoUrl = `https://tpcbnkbteiuoctwqqfgv.supabase.co/storage/v1/object/public/photos/attendance/${a.photo}`;
                 imgData = await getImageDataUrl(photoUrl);
             }
-
             return [
                 index + 1,
                 a.fullName ?? '',
@@ -717,7 +720,7 @@ if (exportBtn) {
                 a.type_attendee ?? '',
                 a.phone_number ?? '',
                 a.purpose ?? '',
-                imgData, // Base64 image for PDF
+                imgData,
                 a.attendance_date ?? '',
                 a.attendance_time ?? ''
             ];
@@ -732,8 +735,8 @@ if (exportBtn) {
             body: tableData,
             styles: { fontSize: 8 },
             didDrawCell: function (data) {
-                if (data.column.index === 6 && data.cell.raw) { // Photo column
-                    const dim = 12; // size of photo in PDF
+                if (data.column.index === 6 && data.cell.raw) {
+                    const dim = 12; // image size
                     doc.addImage(data.cell.raw, 'JPEG', data.cell.x + 1, data.cell.y + 1, dim, dim);
                 }
             }
