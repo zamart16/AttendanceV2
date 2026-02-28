@@ -304,7 +304,7 @@
               <i class="ri-file-list-3-fill text-2xl text-white"></i>
             </div>
           </div>
-          <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">OPPMO - Official Attendance Sheet </h1>
+          <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">BAC Meeting - Official Attendance Sheet </h1>
           <p class="text-xl text-blue-50 font-medium">Professional Attendance Registration System</p>
           <div class="mt-6 flex items-center justify-center space-x-4">
             <div class="h-1 w-12 bg-gradient-to-r from-transparent via-white/60 to-transparent rounded-full"></div>
