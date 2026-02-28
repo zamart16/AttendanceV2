@@ -325,7 +325,7 @@
 
     <script>
   // 🔗 Attendance QR URL
-  const attendanceURL = "https://bac-meeting-attendances.up.railway.app/bac-attendance";
+  const attendanceURL = "https://attendancev2-production.up.railway.app/bac-attendance";
 
   new QRCode(document.getElementById("qrcode"), {
     text: attendanceURL,
